@@ -164,6 +164,27 @@ if ($courseid != SITEID) {
     echo $OUTPUT->header();
 }
 
+$blogpage = optional_param('blogpage', 0, PARAM_INT);
+if ($blogpage < 1 && !$entryid) {
+    require_once($CFG->dirroot . '/blog/preferences_form.php');
+    require_once($CFG->dirroot . '/user/editlib.php');
+
+    $mform = new blog_preferences_form();
+    $mform->set_data(array('pagesize' => get_user_preferences('blogpagesize')));
+
+    if (!$mform->is_cancelled() && $data = $mform->get_data()) {
+        $pagesize = $data->pagesize;
+
+        if ($pagesize < 1) {
+            print_error('invalidpagesize');
+        }
+        useredit_update_user_preference(['id' => $USER->id,
+            'preference_blogpagesize' => $pagesize]);
+    }
+
+    $mform->display();
+}
+
 echo $OUTPUT->heading($blogheaders['heading'], 2);
 
 $bloglisting = new blog_listing($blogheaders['filters']);
